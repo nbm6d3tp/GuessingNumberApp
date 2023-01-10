@@ -2,7 +2,7 @@ import {ImageBackground, SafeAreaView, StyleSheet} from 'react-native';
 import StartGameScreen from './screens/StartGameScreen';
 import GameScreen from './screens/GameScreen';
 import GameOverScreen from './screens/GameOverScreen';
-import React, {useCallback, useState} from 'react';
+import React, {useCallback, useState, useRef} from 'react';
 import {useFonts} from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import {LinearGradient} from 'expo-linear-gradient';
@@ -10,8 +10,9 @@ import Colors from './constants/colors';
 SplashScreen.preventAutoHideAsync();
 
 export default function App() {
-  const [choosedNumber, setChoosedNumber] = useState(null);
+  const [chosenNumber, setChosenNumber] = useState(null);
   const [isGameOver, setIsGameOver] = useState(false);
+  const nbRounds = useRef();
   const [fontsLoaded] = useFonts({
     openSansBold: require('./assets/fonts/OpenSans-Bold.ttf'),
     openSans: require('./assets/fonts/OpenSans-Regular.ttf'),
@@ -25,14 +26,28 @@ export default function App() {
     return null;
   }
 
-  let screen = <StartGameScreen setChoosedNumber={setChoosedNumber} />;
-  if (choosedNumber && !isGameOver) {
+  const onGameOverHandler = nbPlayedRounds => {
+    setIsGameOver(true);
+    nbRounds.current = nbPlayedRounds;
+  };
+  const onStartNewGameHandler = () => {
+    setIsGameOver(false);
+    setChosenNumber(null);
+  };
+  let screen = <StartGameScreen setChosenNumber={setChosenNumber} />;
+  if (chosenNumber && !isGameOver) {
     screen = (
-      <GameScreen setIsGameOver={setIsGameOver} choosedNumber={choosedNumber} />
+      <GameScreen onGameOver={onGameOverHandler} chosenNumber={chosenNumber} />
     );
   }
-  if (isGameOver) {
-    screen = <GameOverScreen choosedNumber={choosedNumber} />;
+  if (chosenNumber && isGameOver) {
+    screen = (
+      <GameOverScreen
+        onStartNewGame={onStartNewGameHandler}
+        nbRounds={nbRounds.current}
+        chosenNumber={chosenNumber}
+      />
+    );
   }
   return (
     <LinearGradient

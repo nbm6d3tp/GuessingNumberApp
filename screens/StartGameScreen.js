@@ -5,7 +5,7 @@ import Card from '../components/ui/Card';
 import {default as Button} from '../components/ui/Button';
 import Colors from '../constants/colors';
 
-const StartGameScreen = ({setChoosedNumber}) => {
+const StartGameScreen = ({setChosenNumber}) => {
   const [enteredText, setEnteredText] = useState('');
   const onChangeTextHandler = changedText => {
     setEnteredText(changedText);
@@ -23,7 +23,7 @@ const StartGameScreen = ({setChoosedNumber}) => {
         [{text: 'Okay', style: 'destructive', onPress: setEnteredText('')}],
       );
     } else {
-      setChoosedNumber(enteredNumber);
+      setChosenNumber(enteredNumber);
     }
   };
   return (

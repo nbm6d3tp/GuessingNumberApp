@@ -8,7 +8,7 @@ import {Ionicons} from '@expo/vector-icons';
 import HistoryItem from '../components/game/HistoryItem';
 
 const generateRandomBetween = (min, max, exclude) => {
-  const rndNum = Math.floor(Math.random() * (max - min)) + min;
+  const rndNum = Math.floor(Math.random() * (max + 1 - min)) + min;
 
   if (rndNum === exclude) {
     return generateRandomBetween(min, max, exclude);
@@ -17,77 +17,69 @@ const generateRandomBetween = (min, max, exclude) => {
   }
 };
 
-const GameScreen = ({choosedNumber, setIsGameOver}) => {
+const GameScreen = ({chosenNumber, onGameOver}) => {
   const [printedNumber, setPrintedNumber] = useState(
-    generateRandomBetween(1, 100, choosedNumber),
+    generateRandomBetween(1, 99, chosenNumber),
   );
   const [historyList, setHistoryList] = useState([]);
   const min = useRef(1);
-  const max = useRef(100);
+  const max = useRef(99);
 
   const plusButtonPressedHandler = () => {
-    if (min.current === choosedNumber || max.current === choosedNumber) {
-      setIsGameOver(true);
-      return;
-    }
-    if (choosedNumber > printedNumber) {
+    let historyItem = {};
+    if (chosenNumber > printedNumber) {
       min.current = printedNumber + 1;
+      if (min.current >= max.current) {
+        onGameOver(historyList.length + 1);
+        return;
+      }
       setPrintedNumber(
-        generateRandomBetween(min.current, max.current, choosedNumber),
+        generateRandomBetween(min.current, max.current, chosenNumber),
       );
-      setHistoryList([
-        {
-          id: historyList.length + 1,
-          choice: 'Higher than ' + printedNumber,
-          isTrueChoice: true,
-        },
-        ...historyList,
-      ]);
+      historyItem = {
+        id: historyList.length + 1,
+        choice: 'Higher than ' + printedNumber,
+        isTrueChoice: true,
+      };
     } else {
-      setHistoryList([
-        {
-          id: historyList.length + 1,
-          choice: 'Higher than ' + printedNumber,
-          isTrueChoice: false,
-        },
-        ...historyList,
-      ]);
+      historyItem = {
+        id: historyList.length + 1,
+        choice: 'Higher than ' + printedNumber,
+        isTrueChoice: false,
+      };
     }
+    setHistoryList([historyItem, ...historyList]);
   };
   const minusButtonPressedHandler = () => {
-    if (min.current === choosedNumber || max.current === choosedNumber) {
-      setIsGameOver(true);
-      return;
-    }
-    if (choosedNumber < printedNumber) {
+    let historyItem = {};
+    if (chosenNumber < printedNumber) {
       max.current = printedNumber - 1;
+      if (min.current >= max.current) {
+        onGameOver(historyList.length + 1);
+        return;
+      }
       setPrintedNumber(
-        generateRandomBetween(min.current, max.current, choosedNumber),
+        generateRandomBetween(min.current, max.current, chosenNumber),
       );
-      setHistoryList([
-        {
-          id: historyList.length + 1,
-          choice: 'Lower than ' + printedNumber,
-          isTrueChoice: true,
-        },
-        ...historyList,
-      ]);
+      historyItem = {
+        id: historyList.length + 1,
+        choice: 'Lower than ' + printedNumber,
+        isTrueChoice: true,
+      };
     } else {
-      setHistoryList([
-        {
-          id: historyList.length + 1,
-          choice: 'Lower than ' + printedNumber,
-          isTrueChoice: false,
-        },
-        ...historyList,
-      ]);
+      historyItem = {
+        id: historyList.length + 1,
+        choice: 'Lower than ' + printedNumber,
+        isTrueChoice: false,
+      };
     }
+    setHistoryList([historyItem, ...historyList]);
   };
 
   return (
     <View style={styles.container}>
       <Title>Opponent's Guess</Title>
-      <Title style={styles.choosedNumber}>{printedNumber}</Title>
+      <Title style={styles.chosenNumber}>{printedNumber}</Title>
       <Card
         instructionText="Lower or Higher?"
         leftButton={
@@ -124,7 +116,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
-  choosedNumber: {
+  chosenNumber: {
     color: Colors.accent500,
     borderColor: Colors.accent500,
     width: '75%',
